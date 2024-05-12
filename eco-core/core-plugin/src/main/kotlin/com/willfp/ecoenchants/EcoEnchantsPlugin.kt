@@ -4,6 +4,7 @@ import com.willfp.eco.core.Prerequisite
 import com.willfp.eco.core.command.impl.PluginCommand
 import com.willfp.eco.core.display.DisplayModule
 import com.willfp.eco.core.integrations.IntegrationLoader
+import com.willfp.eco.core.packet.PacketListener
 import com.willfp.ecoenchants.commands.CommandEcoEnchants
 import com.willfp.ecoenchants.commands.CommandEnchant
 import com.willfp.ecoenchants.commands.CommandEnchantInfo
@@ -39,6 +40,7 @@ import com.willfp.libreforge.loader.configs.ConfigCategory
 import com.willfp.libreforge.registerHolderPlaceholderProvider
 import com.willfp.libreforge.registerHolderProvider
 import com.willfp.libreforge.registerSpecificRefreshFunction
+import org.bukkit.Bukkit
 import org.bukkit.entity.LivingEntity
 import org.bukkit.event.Listener
 
@@ -85,10 +87,24 @@ class EcoEnchantsPlugin : LibreforgePlugin() {
                 NamedValue("level", it.level),
             )
         }
+
+        if (Prerequisite.HAS_1_20_5.isMet) {
+            getProxy(CodecReplacerProxy::class.java).replaceItemCodec()
+        }
     }
 
     override fun handleAfterLoad() {
         isLoaded = true
+
+        // Run in afterLoad to prevent items from having their enchantments deleted
+        if (Prerequisite.HAS_1_20_5.isMet) {
+            if (!this.configYml.getBool("enable-1-20-6")) {
+                Bukkit.getPluginManager().disablePlugin(this)
+
+                throw IllegalStateException("EcoEnchants should not be ran in production on 1.20.6. " +
+                        "If this is a development environment, please set 'enable-1-20-6' to true in config.yml. ")
+            }
+        }
     }
 
     override fun handleReload() {
