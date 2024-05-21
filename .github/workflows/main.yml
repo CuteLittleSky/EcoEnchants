@@ -30,6 +30,3 @@ jobs:
         with:
          name: EcoEnchants
          path: build/libs/
-        with:
-          name: Artifacts
-          path: bin/*.jar
