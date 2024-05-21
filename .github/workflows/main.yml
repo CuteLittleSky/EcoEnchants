@@ -1,6 +1,9 @@
-name: Build EcoEnchants
+ame: Build
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
 
 jobs:
   build:
@@ -30,3 +33,15 @@ jobs:
         with:
          name: EcoEnchants
          path: build/libs/
+      - name: Set Short SHA
+        id: short-sha
+        run: echo "SHORT_SHA=$(git rev-parse --short $GITHUB_SHA)" >> $GITHUB_ENV
+      - name: automatic releases
+        uses: marvinpinto/action-automatic-releases@v1.2.1
+        with:
+         repo_token: "${{ secrets.GITHUB_TOKEN }}"
+         automatic_release_tag: "${{ env.SHORT_SHA }}"
+         prerelease: false
+         title: "EcoEnchants-${{ env.SHORT_SHA }} Automatic build version"
+         files: |
+           build/libs/*
